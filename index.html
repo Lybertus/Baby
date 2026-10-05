@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>BabyKompass – Das große Eltern-Kompendium fürs 1. Lebensjahr</title>
+  
+  <!-- iOS Safari & iPhone PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BabyKompass">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#020617">
+  
+  <!-- App Icons & Manifest -->
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+  <link rel="manifest" href="./manifest.json">
+  
+  <!-- Immediate Theme & Design Check (OLED pure black by default) -->
+  <script>
+    (function() {
+      var theme = localStorage.getItem('babyguide_theme_mode');
+      if (!theme) {
+        theme = (localStorage.getItem('babyguide_dark_mode') === 'false') ? 'light' : 'oled';
+      }
+      var accent = localStorage.getItem('babyguide_accent_color') || 'sky';
+      var fontSize = localStorage.getItem('babyguide_font_size') || 'normal';
+      
+      document.documentElement.classList.remove('dark', 'theme-oled', 'theme-redlight', 'theme-midnight', 'theme-light', 'theme-sepia', 'font-normal', 'font-large', 'font-xlarge');
+      if (theme === 'oled') {
+        document.documentElement.classList.add('dark', 'theme-oled');
+      } else if (theme === 'redlight') {
+        document.documentElement.classList.add('dark', 'theme-redlight');
+      } else if (theme === 'midnight') {
+        document.documentElement.classList.add('dark', 'theme-midnight');
+      } else if (theme === 'sepia') {
+        document.documentElement.classList.add('theme-sepia');
+      } else {
+        document.documentElement.classList.add('theme-light');
+      }
+      document.documentElement.classList.add('font-' + fontSize);
+      document.documentElement.setAttribute('data-accent', accent);
+    })();
+  </script>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-sky-200">
+
+  <!-- ========================================================================= -->
+  <!-- TOP STICKY NAVBAR -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-4">
+        
+        <!-- Logo & Title -->
+        <div class="flex items-center gap-3 cursor-pointer group" onclick="window.navigateTo('tab', 'home')">
+          <div class="relative w-10 h-10 rounded-[10px] overflow-hidden shadow-sm shadow-sky-900/10 border border-black/5 dark:border-white/10 transition-transform duration-200 group-hover:scale-105 active:scale-95 flex-shrink-0">
+            <img src="./apple-logo.svg" alt="BabyKompass Logo" class="w-full h-full object-cover">
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white block leading-none">Baby<span class="text-sky-600 dark:text-sky-400">Kompass</span></span>
+              <span class="px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded bg-sky-100 text-sky-700 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60 leading-none">PRO</span>
+            </div>
+            <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-400 block mt-1">Das Große Eltern-Kompendium</span>
+          </div>
+        </div>
+
+        <!-- Search Bar (Desktop) -->
+        <div class="hidden md:flex flex-1 max-w-md mx-4 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <input 
+            type="text" 
+            id="global-search-input"
+            placeholder="Suche nach Schütteln, Fieber, Schlaf, RSV, Beikost, TOG..." 
+            class="w-full pl-9 pr-8 py-2 text-sm bg-slate-100 dark:bg-slate-800/90 border border-transparent dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:border-sky-500 dark:focus:border-sky-400 focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-900/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-400 text-slate-800 dark:text-white"
+          >
+          <button id="clear-search-btn" class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <!-- Action Items -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Overall Progress badge -->
+          <div class="hidden xl:flex items-center gap-2 bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div class="text-xs">
+              <span class="text-slate-500 dark:text-slate-400">Lernfortschritt: </span>
+              <strong id="top-progress-text" class="text-slate-900 dark:text-white font-bold">0 / 20 (0%)</strong>
+            </div>
+            <div class="w-16 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+              <div id="top-progress-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+
+          <!-- Baby Profile ("Mein Baby") -->
+          <button id="baby-profile-btn" onclick="window.openBabyProfileModal()" class="px-2.5 sm:px-3 py-2 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm hover:scale-105 cursor-pointer" title="Baby-Profil: Name, Alter & Gewicht für automatische Rechner anpassen">
+            <span>👶</span>
+            <span id="baby-profile-chip-text" class="hidden sm:inline">Mein Baby</span>
+          </button>
+
+          <!-- Settings & Design Modal Button -->
+          <button id="open-settings-btn" onclick="window.openSettingsModal()" class="px-2.5 sm:px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer" title="Farben, Designs & Schriftgröße anpassen">
+            <span>⚙️</span>
+            <span class="hidden md:inline">Design</span>
+          </button>
+
+          <!-- Quick Theme Cycle Button -->
+          <button id="theme-toggle-btn" onclick="window.cycleTheme()" class="px-2.5 sm:px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer" title="Zwischen OLED Schwarz, Mitternacht, Hell und Sepia wechseln">
+            <span id="theme-toggle-icon">🖤</span>
+            <span class="hidden md:inline" id="theme-toggle-text">OLED</span>
+          </button>
+
+          <!-- Bookmarks / Merkliste -->
+          <button id="open-bookmarks-btn" onclick="window.openBookmarksModal()" class="px-2.5 sm:px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer" title="Gespeicherte Lesezeichen anzeigen">
+            <span>⭐</span>
+            <span class="hidden md:inline">Gemerkt</span>
+            <span id="bookmarks-count-badge" class="px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/80 text-amber-900 dark:text-amber-200 text-[10px] font-black">0</span>
+          </button>
+
+          <!-- SOS Emergency Button -->
+          <button class="open-emergency-btn flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-rose-200 transition-all animate-pulse-gentle cursor-pointer">
+            <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+            <span>🚨 SOS & Notfall</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Mobile Search Field -->
+      <div class="md:hidden pb-3">
+        <input 
+          type="text" 
+          id="global-search-input-mobile"
+          placeholder="Suche nach Notfall, Fieber, Schlaf, RSV..." 
+          oninput="document.getElementById('global-search-input').value = this.value; document.getElementById('global-search-input').dispatchEvent(new Event('input'))"
+          class="w-full px-3 py-2 text-sm bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400"
+        >
+      </div>
+
+      <!-- Nav Tabs -->
+      <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 border-t border-slate-100 dark:border-slate-800 no-scrollbar text-xs sm:text-sm">
+        <button data-tab-target="home" class="px-3.5 py-1.5 rounded-lg font-bold bg-sky-600 text-white whitespace-nowrap transition-colors">
+          🚨 Wichtigstes zuerst
+        </button>
+        <button data-tab-target="lessons" class="px-3.5 py-1.5 rounded-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition-colors">
+          📚 Alle Lerneinheiten
+        </button>
+        <button data-tab-target="dodont" class="px-3.5 py-1.5 rounded-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition-colors">
+          ⚖️ Do's & Don'ts
+        </button>
+        <button data-tab-target="development" class="px-3.5 py-1.5 rounded-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition-colors">
+          🗓️ Entwicklung 1–12M
+        </button>
+        <button data-tab-target="illnesses" class="px-3.5 py-1.5 rounded-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition-colors">
+          🩺 Krankheiten-Lexikon
+        </button>
+        <button data-tab-target="tools" class="px-3.5 py-1.5 rounded-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition-colors">
+          🛠️ Eltern-Tools & Rechner
+        </button>
+        <button data-tab-target="quiz" class="px-3.5 py-1.5 rounded-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition-colors">
+          🎓 Eltern-Diplom Quiz
+        </button>
+        <button data-tab-target="checklists" class="px-3.5 py-1.5 rounded-lg font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition-colors">
+          📋 Checklisten
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN CONTENT CONTAINER -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- SEARCH RESULTS SECTION (Dynamically displayed when typing) -->
+    <section id="search-results-section" class="hidden"></section>
+
+    <!-- FULL PAGE ARTICLE / DETAIL VIEW SECTION -->
+    <section id="page-detail-view" class="hidden"></section>
+
+    <!-- MAIN TABS CONTAINER -->
+    <div id="main-tab-contents">
+      
+      <!-- ===================================================================== -->
+      <!-- TAB 1: HOME / WICHTIGSTES ZUERST (TOP PRIORITY) -->
+      <!-- ===================================================================== -->
+      <section id="tab-content-home" class="tab-content-section space-y-10">
+        
+        <!-- Hero Banner -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-sky-950 to-slate-900 text-white p-8 sm:p-12 shadow-xl border border-sky-900/50">
+          <div class="relative z-10 max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-300 text-xs font-bold uppercase tracking-wider mb-4">
+              <span>⚠️ Lebensrettendes Vorwissen</span>
+              <span>•</span>
+              <span id="home-hero-greeting">Evidenzbasierte Pädiatrie</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight mb-4">
+              Alles, was du über dein Baby wissen musst. <br>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-300">
+                Die wichtigsten Dinge zuerst.
+              </span>
+            </h1>
+            <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">
+              Eltern zu werden ist ein großes Abenteuer. Jedes Thema auf dieser Plattform lässt sich anklicken, um ausführliche, tiefgehende Fachartikel mit physiologischen Hintergründen, Do's & Don'ts und Notfallplänen zu öffnen.
+            </p>
+            <div class="flex flex-wrap gap-4">
+              <a href="#kardinalregeln" class="px-6 py-3 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-sky-500/25 transition-all text-sm">
+                Zu den 4 Kardinalregeln ↓
+              </a>
+              <a href="#notfallplaene" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl shadow-lg shadow-rose-600/25 transition-all text-sm flex items-center gap-1.5">
+                <span>🚨 Notfallpläne & Erste Hilfe ↓</span>
+              </a>
+              <button onclick="window.navigateTo('tab', 'lessons')" class="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-semibold transition-all text-sm">
+                Zu allen Lerneinheiten (Modul 0–8)
+              </button>
+            </div>
+          </div>
+          
+          <!-- Decorative ambient circle -->
+          <div class="absolute -right-20 -bottom-20 w-96 h-96 rounded-full bg-sky-500/10 blur-3xl pointer-events-none"></div>
+        </div>
+
+        <!-- ÜBERGEORDNETES THEMEN-MENÜ (Fokus-Navigation gegen Endlos-Scrollen) -->
+        <div class="bg-white dark:bg-slate-900/90 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 px-1">
+            <span class="text-xs font-black uppercase tracking-wider text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/70 px-2.5 py-1 rounded-md border border-sky-100 dark:border-sky-800 self-start">
+              🎯 Gezielter Themen-Zugriff
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Wähle deinen Bereich – Kein langes Scrollen mehr nötig:</span>
+          </div>
+
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3" id="home-section-tabs">
+            <button onclick="window.selectHomeSection('emergency')" id="home-tab-btn-emergency" class="home-sec-btn p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 bg-rose-50/70 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800/80 text-slate-900 dark:text-white shadow-sm">
+              <span class="text-2xl sm:text-3xl flex-shrink-0">🚨</span>
+              <div>
+                <strong class="text-xs sm:text-sm font-black block leading-tight">Akut & Notfall</strong>
+                <span class="text-[11px] text-slate-500 dark:text-slate-400">Kardinalregeln & 112</span>
+              </div>
+            </button>
+
+            <button onclick="window.selectHomeSection('tools')" id="home-tab-btn-tools" class="home-sec-btn p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 bg-white dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+              <span class="text-2xl sm:text-3xl flex-shrink-0">⚡</span>
+              <div>
+                <strong class="text-xs sm:text-sm font-black block leading-tight">Sofort-Werkzeuge</strong>
+                <span class="text-[11px] text-slate-500 dark:text-slate-400">Timer, Audio & Rechner</span>
+              </div>
+            </button>
+
+            <button onclick="window.selectHomeSection('stage')" id="home-tab-btn-stage" class="home-sec-btn p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 bg-white dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+              <span class="text-2xl sm:text-3xl flex-shrink-0">🌱</span>
+              <div>
+                <strong class="text-xs sm:text-sm font-black block leading-tight">Baby-Altersphase</strong>
+                <span class="text-[11px] text-slate-500 dark:text-slate-400">Wachfenster & Phasen</span>
+              </div>
+            </button>
+
+            <button onclick="window.selectHomeSection('all')" id="home-tab-btn-all" class="home-sec-btn p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-3 bg-white dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+              <span class="text-2xl sm:text-3xl flex-shrink-0">📑</span>
+              <div>
+                <strong class="text-xs sm:text-sm font-black block leading-tight">Gesamtansicht</strong>
+                <span class="text-[11px] text-slate-500 dark:text-slate-400">Alle Bereiche einblenden</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 1: QUICK ACCESS TO SUPER TOOLS -->
+        <div id="home-sec-tools" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-black uppercase tracking-wider text-sky-600 bg-sky-50 px-2.5 py-1 rounded-md border border-sky-100">
+                ⚡ Akut-Helfer & Rechner
+              </span>
+              <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">Direktzugriff: Deine Alltags- & Notfall-Werkzeuge</h2>
+            </div>
+            <button onclick="window.navigateTo('tab', 'tools')" class="text-xs font-bold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1">
+              <span>Alle 15 Werkzeuge</span>
+              <span>→</span>
+            </button>
+          </div>
+
+          <!-- 1-Tap Schnell-Tagesprotokoll (Quick Log) -->
+          <div id="home-quick-log-container" class="mb-2"></div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <!-- 1. Wachfenster Timer -->
+            <button onclick="window.openTool('tool-wake-timer')" class="p-4 rounded-2xl bg-amber-500/10 border border-amber-300 hover:border-amber-400 hover:bg-amber-500/15 transition-all text-left flex flex-col justify-between group shadow-sm cursor-pointer">
+              <div>
+                <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform">⏱️</span>
+                <span class="text-[10px] font-black uppercase tracking-wider text-amber-700 block">Live Sweet-Spot</span>
+                <strong class="text-xs sm:text-sm font-bold text-slate-900 block leading-tight mt-0.5">Wachfenster Timer</strong>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-2 line-clamp-2">Schlafbereitschaft & Übermüdung stoppen</p>
+            </button>
+
+            <!-- 2. Sound Machine (White & Brown Noise) -->
+            <button onclick="window.openTool('tool-sound-machine')" class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-300 hover:border-indigo-400 hover:bg-indigo-500/15 transition-all text-left flex flex-col justify-between group shadow-sm cursor-pointer">
+              <div>
+                <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform">🔊</span>
+                <span class="text-[10px] font-black uppercase tracking-wider text-indigo-700 block">Offline Audio</span>
+                <strong class="text-xs sm:text-sm font-bold text-slate-900 block leading-tight mt-0.5">Weißes & Braunes Rauschen</strong>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-2 line-clamp-2">Schlaf-Sound, Shush & Herzschlag</p>
+            </button>
+
+            <!-- 3. 3-Uhr-Nachts Symptom-Checker -->
+            <button onclick="window.openTool('tool-triage')" class="p-4 rounded-2xl bg-rose-500/10 border border-rose-300 hover:border-rose-400 hover:bg-rose-500/15 transition-all text-left flex flex-col justify-between group shadow-sm cursor-pointer">
+              <div>
+                <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform">🚨</span>
+                <span class="text-[10px] font-black uppercase tracking-wider text-rose-700 block">3-Uhr-Nachts Triage</span>
+                <strong class="text-xs sm:text-sm font-bold text-slate-900 block leading-tight mt-0.5">Symptom-Checker</strong>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-2 line-clamp-2">Rot/Gelb/Grün: Notdienst oder abwarten?</p>
+            </button>
+
+            <!-- 4. 112 Notruf & CPR Metronom -->
+            <button onclick="window.openTool('tool-cpr-metronome')" class="p-4 rounded-2xl bg-red-500/10 border border-red-300 hover:border-red-400 hover:bg-red-500/15 transition-all text-left flex flex-col justify-between group shadow-sm cursor-pointer">
+              <div>
+                <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform">🩺</span>
+                <span class="text-[10px] font-black uppercase tracking-wider text-red-700 block">110 bpm Taktgeber</span>
+                <strong class="text-xs sm:text-sm font-bold text-slate-900 block leading-tight mt-0.5">112 & CPR-Metronom</strong>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-2 line-clamp-2">5-W-Sprechzettel & Reanimation</p>
+            </button>
+
+            <!-- 5. Fiebersaft-Dosierungsrechner -->
+            <button onclick="window.openTool('tool-medication')" class="p-4 rounded-2xl bg-teal-500/10 border border-teal-300 hover:border-teal-400 hover:bg-teal-500/15 transition-all text-left flex flex-col justify-between group shadow-sm cursor-pointer">
+              <div>
+                <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform">💊</span>
+                <span class="text-[10px] font-black uppercase tracking-wider text-teal-700 block">Gewichtsbasiert</span>
+                <strong class="text-xs sm:text-sm font-bold text-slate-900 block leading-tight mt-0.5">Fiebersaft-Rechner</strong>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-2 line-clamp-2">Paracetamol & Ibuprofen mg / ml</p>
+            </button>
+
+            <!-- 6. In-App Termin- & Impfplaner -->
+            <button onclick="window.openTool('tool-timeline')" class="p-4 rounded-2xl bg-sky-500/10 border border-sky-300 hover:border-sky-400 hover:bg-sky-500/15 transition-all text-left flex flex-col justify-between group shadow-sm cursor-pointer">
+              <div>
+                <span class="text-2xl block mb-2 group-hover:scale-110 transition-transform">🗓️</span>
+                <span class="text-[10px] font-black uppercase tracking-wider text-sky-700 block">In-App Fahrplan</span>
+                <strong class="text-xs sm:text-sm font-bold text-slate-900 block leading-tight mt-0.5">U-Termine & Impfungen</strong>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-2 line-clamp-2">Alle Termine direkt in der App</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 2: INTERACTIVE AGE STAGE FINDER / SCHNELLFINDER -->
+        <div id="home-sec-stage" class="space-y-6">
+          <div id="age-stage-finder" class="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span class="text-xs font-black uppercase tracking-wider text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/70 px-2.5 py-1 rounded-md border border-sky-100 dark:border-sky-800">
+                  🌱 Schnelleinstieg nach Alter
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">In welcher Phase seid ihr gerade?</h3>
+              </div>
+              <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Wähle die Phase für Wachfenster, Schlaf & anstehende Meilensteine:</span>
+            </div>
+
+            <!-- Buttons rendered dynamically via app.js -->
+            <div id="age-selector-buttons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5"></div>
+
+            <!-- Active stage card rendered dynamically via app.js -->
+            <div id="age-stage-dashboard"></div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: EMERGENCY PROTOCOLS & CARDINAL RULES -->
+        <div id="home-sec-emergency" class="space-y-10">
+          <!-- THE 4 ABSOLUTE CARDINAL RULES (Top Priority) -->
+          <div id="kardinalregeln" class="space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/70 px-2.5 py-1 rounded-md border border-rose-200 dark:border-rose-900/80">Höchste Dringlichkeit</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">Die 4 lebenswichtigen Kardinalregeln</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-sm mt-1">Klicke auf eine beliebige Regel, um den vollständigen medizinischen Leitfaden mit Anatomie und Notfall-Ablauf zu öffnen.</p>
+              </div>
+            </div>
+
+            <!-- Injected via app.js (renderPriorityRules) -->
+            <div id="priority-rules-container" class="space-y-6"></div>
+          </div>
+
+          <!-- EMERGENCY PROTOCOLS SECTION (Erste Hilfe & Akutpläne mit Bildern) -->
+          <div id="notfallplaene" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-rose-200 dark:border-rose-900/60 pb-4 gap-3">
+              <div>
+                <span class="text-xs font-black uppercase tracking-wider text-white bg-rose-600 px-3 py-1 rounded-md shadow-sm">
+                  🚨 Lebensrettende Sofortmaßnahmen
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-2">Erste-Hilfe-Notfallpläne (mit Illustrationen)</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-sm mt-1">Im Ernstfall zählt jede Sekunde. Klicke auf einen beliebigen Notfallplan für die illustrierte Schritt-für-Schritt-Anleitung.</p>
+              </div>
+              <a href="tel:112" class="self-start sm:self-auto flex items-center gap-2 px-4 py-2 bg-rose-600 text-white font-extrabold text-sm rounded-xl shadow-md hover:bg-rose-700 transition-all flex-shrink-0">
+                <span>📞 Notruf 112</span>
+              </a>
+            </div>
+
+            <!-- Injected via app.js (renderEmergencyProtocolsGrid) -->
+            <div id="emergency-protocols-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: QUICK JUMP CATEGORIES & TRUST BANNER -->
+        <div id="home-sec-quicklinks" class="space-y-8">
+          <!-- Quick Jump Categories -->
+          <div class="bg-white dark:bg-slate-900/90 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Schnellzugriff nach Themengebieten</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div onclick="window.navigateTo('tab', 'lessons')" class="p-5 rounded-2xl border border-slate-200 dark:border-slate-700/80 hover:border-sky-400 dark:hover:border-sky-400 bg-slate-50/50 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer group">
+                <span class="text-3xl block mb-2">🚨</span>
+                <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Notfälle & Sicherheit</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Erste Hilfe, Reanimation, Verschlucken & Fieber.</p>
+              </div>
+
+              <div onclick="window.navigateTo('tab', 'lessons')" class="p-5 rounded-2xl border border-slate-200 dark:border-slate-700/80 hover:border-sky-400 dark:hover:border-sky-400 bg-slate-50/50 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer group">
+                <span class="text-3xl block mb-2">🍼</span>
+                <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Stillen & Fläschchen</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Anlegen, Pre-Nahrung, Koliken & Paced Bottle Feeding.</p>
+              </div>
+
+              <div onclick="window.navigateTo('tab', 'development')" class="p-5 rounded-2xl border border-slate-200 dark:border-slate-700/80 hover:border-sky-400 dark:hover:border-sky-400 bg-slate-50/50 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer group">
+                <span class="text-3xl block mb-2">🗓️</span>
+                <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Entwicklungskalender</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Monat für Monat von Monat 1 bis zum 1. Geburtstag.</p>
+              </div>
+
+              <div onclick="window.navigateTo('tab', 'illnesses')" class="p-5 rounded-2xl border border-slate-200 dark:border-slate-700/80 hover:border-sky-400 dark:hover:border-sky-400 bg-slate-50/50 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md transition-all cursor-pointer group">
+                <span class="text-3xl block mb-2">🩺</span>
+                <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Krankheiten-Lexikon</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">RSV, Pseudokrupp, Drei-Tage-Fieber & Zahnen.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trust & Sources Banner -->
+          <div class="p-6 rounded-2xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/80 flex flex-col md:flex-row items-center gap-4 text-xs text-slate-600 dark:text-slate-300">
+            <div class="w-12 h-12 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold text-xl flex-shrink-0">
+              🩺
+            </div>
+            <div>
+              <strong class="text-slate-900 dark:text-white text-sm block">Wissenschaftlich fundiert & ärztlich orientiert</strong>
+              Alle Inhalte in diesem Leitfaden basieren auf den aktuellen Empfehlungen der Deutschen Gesellschaft für Kinder- und Jugendmedizin (DGKJ), der Bundeszentrale für gesundheitliche Aufklärung (BZgA), der American Academy of Pediatrics (AAP) sowie der Weltgesundheitsorganisation (WHO).
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 2: LESSONS / ALLE LERNEINHEITEN -->
+      <!-- ===================================================================== -->
+      <section id="tab-content-lessons" class="tab-content-section hidden">
+        <div id="lessons-modules-container"></div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 3: DO'S & DON'TS -->
+      <!-- ===================================================================== -->
+      <section id="tab-content-dodont" class="tab-content-section hidden">
+        <div id="dodont-container"></div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 4: ENTWICKLUNGSKALENDER (MONAT 1-12) -->
+      <!-- ===================================================================== -->
+      <section id="tab-content-development" class="tab-content-section hidden">
+        <div id="development-container"></div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 5: KRANKHEITEN-LEXIKON -->
+      <!-- ===================================================================== -->
+      <section id="tab-content-illnesses" class="tab-content-section hidden">
+        <div id="illnesses-container"></div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 6: INTERACTIVE TOOLS -->
+      <!-- ===================================================================== -->
+      <section id="tab-content-tools" class="tab-content-section hidden">
+        <div id="tools-container"></div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 7: QUIZ / ELTERN-DIPLOM -->
+      <!-- ===================================================================== -->
+      <section id="tab-content-quiz" class="tab-content-section hidden">
+        <div id="quiz-container"></div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- TAB 8: CHECKLISTS -->
+      <!-- ===================================================================== -->
+      <section id="tab-content-checklists" class="tab-content-section hidden">
+        <div id="checklists-container"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- EMERGENCY SOS MODAL -->
+  <!-- ========================================================================= -->
+  <div id="emergency-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-rose-950/70 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border-2 border-rose-500 dark:border-rose-900/80 p-6 md:p-8">
+      <div class="flex items-center justify-between border-b border-rose-200 dark:border-rose-900/60 pb-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-xl">
+            🚨
+          </div>
+          <div>
+            <h3 class="text-2xl font-black text-slate-900 dark:text-white">NOTFALL-GUIDE & SOFORTMASSNAHMEN</h3>
+            <span class="text-xs font-bold text-rose-700 dark:text-rose-400">Im Zweifel IMMER sofort die 112 wählen!</span>
+          </div>
+        </div>
+        <button id="close-emergency-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div id="emergency-modal-body"></div>
+
+      <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 text-center">
+        <button onclick="document.getElementById('emergency-modal').classList.add('hidden')" class="px-6 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 text-sm">
+          Fenster schließen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- BOOKMARKS / MERKLISTE MODAL -->
+  <!-- ========================================================================= -->
+  <div id="bookmarks-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-6 md:p-8">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-xl shadow-md shadow-amber-100">
+            ⭐
+          </div>
+          <div>
+            <h3 class="text-2xl font-black text-slate-900 dark:text-white">Deine Merkliste & Favoriten</h3>
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Artikel, Lektionen und Notfallpläne zur schnellen Wiedervorlage</span>
+          </div>
+        </div>
+        <button onclick="window.closeBookmarksModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div id="bookmarks-modal-body" class="space-y-4"></div>
+
+      <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <button onclick="window.clearAllBookmarks()" class="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 font-bold">
+          Alle Lesezeichen löschen
+        </button>
+        <button onclick="window.closeBookmarksModal()" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-200 text-sm">
+          Schließen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- SETTINGS / DESIGN & FARBEN MODAL -->
+  <!-- ========================================================================= -->
+  <div id="settings-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-6 md:p-8">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-black text-xl shadow-md">
+            ⚙️
+          </div>
+          <div>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Design & Einstellungen</h3>
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Für MacBook & iPhone optimiert</span>
+          </div>
+        </div>
+        <button onclick="window.closeSettingsModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div id="settings-modal-body" class="space-y-6"></div>
+
+      <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <button onclick="window.resetSettingsToDefault()" class="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-semibold underline">
+          Auf Standard zurücksetzen
+        </button>
+        <button onclick="window.closeSettingsModal()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold text-sm shadow-md transition-all">
+          Fertig & Schließen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- BABY PROFILE ("MEIN BABY") MODAL -->
+  <!-- ========================================================================= -->
+  <div id="baby-profile-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-6 md:p-8">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-black text-xl shadow-md">
+            👶
+          </div>
+          <div>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Mein Baby – Profil</h3>
+            <span class="text-xs font-semibold text-slate-500">Passt Rechner, Wachfenster & U-Termine automatisch an</span>
+          </div>
+        </div>
+        <button onclick="window.closeBabyProfileModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div id="baby-profile-modal-body" class="space-y-4"></div>
+
+      <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <button onclick="window.resetBabyProfile()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold underline">
+          Profil leeren
+        </button>
+        <button onclick="window.saveBabyProfileFromModal()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold text-sm shadow-md transition-all">
+          Speichern & Anwenden
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- TRACKER ADJUSTMENT MODAL (Wachfenster & Trinkabstände) -->
+  <!-- ========================================================================= -->
+  <div id="tracker-adjust-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 p-6 md:p-8">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-xl shadow-md">
+            ⏳
+          </div>
+          <div>
+            <h3 class="text-xl font-black text-slate-900 dark:text-white">Bio-Rhythmus anpassen</h3>
+            <span class="text-xs font-semibold text-slate-500">Wachfenster & Trink-Intervalle einstellen</span>
+          </div>
+        </div>
+        <button onclick="window.closeTrackerAdjustmentModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div id="tracker-adjust-modal-body" class="space-y-5 text-xs"></div>
+
+      <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <button onclick="window.resetTrackerAdjustmentToDefault()" class="text-xs text-sky-600 dark:text-sky-400 hover:underline font-bold cursor-pointer">
+          Auf Altersnorm zurücksetzen
+        </button>
+        <button onclick="window.saveTrackerAdjustment()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold text-sm shadow-md transition-all cursor-pointer">
+          Speichern
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- FLOATING AUDIO MINI-PLAYER BAR (Web-Audio Einschlafhilfe) -->
+  <!-- ========================================================================= -->
+  <div id="global-audio-player-bar" class="hidden fixed bottom-16 md:bottom-6 left-4 right-4 max-w-lg md:mx-auto z-40 bg-slate-900/95 text-white backdrop-blur-xl rounded-2xl shadow-2xl border border-sky-500/30 p-3 flex items-center justify-between gap-3 animate-slide-up no-print">
+    <div class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0" onclick="window.openSoundToolDirectly()">
+      <div class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center font-bold text-base flex-shrink-0 animate-pulse">
+        <span id="floating-audio-icon">🟫</span>
+      </div>
+      <div class="truncate">
+        <div class="text-xs font-bold truncate flex items-center gap-1.5">
+          <span id="floating-audio-title">Braunes Rauschen</span>
+          <span id="floating-audio-timer-badge" class="px-1.5 py-0.2 rounded-full bg-sky-400/20 text-sky-300 text-[10px] font-semibold">Aktiv</span>
+        </div>
+        <div class="text-[10px] text-slate-400 truncate">Tippen für Sound-Tools & Timer</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1.5 flex-shrink-0">
+      <input type="range" min="0.05" max="1.0" step="0.05" id="floating-audio-vol" value="0.5" class="w-14 accent-sky-400 cursor-pointer hidden sm:inline-block" oninput="window.setAmbientVolume(this.value)" title="Lautstärke">
+      <button id="floating-audio-playpause-btn" onclick="window.toggleAudioPlayPause()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-xs transition-colors" title="Pausieren / Fortsetzen">
+        ⏸️
+      </button>
+      <button onclick="window.stopAudioCompletely()" class="w-8 h-8 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 flex items-center justify-center text-xs transition-colors" title="Ausschalten">
+        ⏹️
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MOBILE BOTTOM DOCK NAVIGATION (iPhone 15 Pro Max & Smartphones) -->
+  <!-- ========================================================================= -->
+  <nav id="mobile-bottom-dock" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 flex items-center justify-around shadow-2xl transition-all no-print" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));">
+    <button onclick="window.navigateTo('tab', 'home')" class="mobile-dock-btn active flex flex-col items-center justify-center flex-1 py-2 text-[10px] font-bold text-sky-600 dark:text-sky-400" data-dock-tab="home">
+      <span class="text-xl mb-0.5">🏠</span>
+      <span>Start</span>
+    </button>
+    <button onclick="window.navigateTo('tab', 'lessons')" class="mobile-dock-btn flex flex-col items-center justify-center flex-1 py-2 text-[10px] font-medium text-slate-500 dark:text-slate-400" data-dock-tab="lessons">
+      <span class="text-xl mb-0.5">📚</span>
+      <span>Wissen</span>
+    </button>
+    <button onclick="window.navigateTo('tab', 'tools')" class="mobile-dock-btn flex flex-col items-center justify-center flex-1 py-2 text-[10px] font-medium text-slate-500 dark:text-slate-400" data-dock-tab="tools">
+      <span class="text-xl mb-0.5">🛠️</span>
+      <span>Tools</span>
+    </button>
+    <button onclick="window.navigateTo('tab', 'development')" class="mobile-dock-btn flex flex-col items-center justify-center flex-1 py-2 text-[10px] font-medium text-slate-500 dark:text-slate-400" data-dock-tab="development">
+      <span class="text-xl mb-0.5">🗓️</span>
+      <span>Monate</span>
+    </button>
+    <button onclick="window.toggleEmergencyModal(true)" class="mobile-dock-btn flex flex-col items-center justify-center flex-1 py-2 text-[10px] font-black text-rose-600 dark:text-rose-400 animate-pulse-gentle">
+      <span class="text-xl mb-0.5">🚨</span>
+      <span>SOS</span>
+    </button>
+  </nav>
+
+  <!-- FLOATING BACK TO TOP BUTTON -->
+  <button id="back-to-top-btn" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" class="hidden fixed bottom-6 right-6 z-30 p-3.5 bg-slate-900/90 text-white rounded-2xl shadow-xl hover:bg-sky-600 transition-all no-print cursor-pointer backdrop-blur" title="Nach oben scrollen">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+  </button>
+
+  <!-- ========================================================================= -->
+  <!-- FOOTER -->
+  <!-- ========================================================================= -->
+  <footer class="bg-white border-t border-slate-200 mt-16 py-8 text-xs text-slate-500 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2.5">
+        <img src="./apple-logo.svg" alt="BabyKompass" class="w-6 h-6 rounded-md shadow-sm">
+        <span class="font-bold text-slate-800 dark:text-slate-200">BabyKompass</span>
+        <span>•</span>
+        <span>Für informierte, sichere und gelassene Eltern</span>
+      </div>
+      <div class="text-center md:text-right max-w-lg leading-relaxed">
+        <strong>Medizinischer Hinweis:</strong> Diese Plattform dient der allgemeinen Aufklärung und Elternbildung. Sie ersetzt in keinem Fall die fachkundige Untersuchung durch eine Hebamme, einen Kinderarzt oder einen Notarzt. Bei akuter Atemnot, Fieber bei Neugeborenen oder Bewusstseinsstörungen sofort <strong>112</strong> anrufen.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Hidden iOS Audio Session Activator (Unlocks WebKit Playback mode & hardware ringer bypass) -->
+  <audio id="ios-audio-activator" playsinline preload="auto" style="display:none;" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+
+  <!-- Scripts (Universal file:// and http:// compatibility) -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Service Worker Registration for Offline / PWA -->
+  <script>
+    if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn('SW registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
